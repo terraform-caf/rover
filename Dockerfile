@@ -20,8 +20,8 @@ ENV versionTerraform=${versionTerraform} \
     versionJq=${versionJq} \
     versionDockerCompose=${versionDockerCompose} \
     versionLaunchpadOpensource=${versionLaunchpadOpensource} \
-    TF_DATA_DIR="/home/vscode/.terraform.cache" \
-    TF_PLUGIN_CACHE_DIR="/home/vscode/.terraform.cache/plugin-cache"
+    TF_DATA_DIR="/home/${USERNAME}/.terraform.cache" \
+    TF_PLUGIN_CACHE_DIR="/home/${USERNAME}/.terraform.cache/plugin-cache"
 
 
 RUN yum -y update && \
@@ -49,7 +49,8 @@ RUN yum -y groupinstall "Development Tools" && \
         curl-devel \
         openssl-devel && \
     yum -y autoremove && \
-    yum -y install unzip
+    yum -y install unzip \
+        bzip2
 
     # Install Docker CE CLI. 
 RUN yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo && \
@@ -62,8 +63,8 @@ RUN yum-config-manager --add-repo https://download.docker.com/linux/centos/docke
     #
     # Install Docker-Compose
     echo "Installing docker-compose ${versionDockerCompose}..." && \
-    curl -sSL -o /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/${versionDockerCompose}/docker-compose-Linux-x86_64" && \
-    chmod +x /usr/local/bin/docker-compose && \
+    curl -sSL -o /usr/bin/docker-compose "https://github.com/docker/compose/releases/download/${versionDockerCompose}/docker-compose-Linux-x86_64" && \
+    chmod +x /usr/bin/docker-compose && \
     #
     # Install Azure-cli
     echo "Installing azure-cli ${versionAzureCli}..." && \
@@ -81,7 +82,7 @@ gpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azu
     az extension add --name azure-devops && \
     #
     echo "Installing jq ${versionJq}..." && \
-    curl -sSL -o /usr/local/bin/jq -sSL -o /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-${versionJq}/jq-linux64 && \
+    curl -sSL -o /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-${versionJq}/jq-linux64 && \
     chmod +x /usr/local/bin/jq && \
     #
     # echo "Installing graphviz ..." && \
@@ -103,7 +104,7 @@ gpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/azu
         openssh-clients \
         man \
         ansible \
-        which
+        which 
 
 RUN useradd --uid $USER_UID -m -G docker ${USERNAME} && \
     # sudo usermod -aG docker ${USERNAME} && \
@@ -119,7 +120,7 @@ RUN echo "cloning the launchpads version ${versionLaunchpadOpensource}" && \
     git clone https://github.com/aztfmod/level0.git /tf/launchpads --branch ${versionLaunchpadOpensource} && \
     echo "alias rover=/tf/rover/launchpad.sh" >> /home/${USERNAME}/.bashrc && \
     echo "alias t=/usr/local/bin/terraform" >> /home/${USERNAME}/.bashrc && \
-    chown -R vscode:1000 /tf/launchpads
+    chown -R ${USERNAME}:1000 /tf/launchpads
 
 WORKDIR /tf/rover
 
